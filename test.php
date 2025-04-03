@@ -46,7 +46,11 @@ runTest("Test 2 - Format with Data Fields", $coreg_url_2);
 $coreg_url_3 = "country;id_campaign;email;firstname##au;1401;__email__";
 runTest("Test 3 - Invalid Format (Mismatch)", $coreg_url_3);
 
-// Test case 4: JSON format input for convertJsonAPIDataToString
+// Test case 4: Format with nested key fields
+$coreg_url_4 = "country;id_campaign;data[email];data[firstname];data[surname];data[gender];BirthDate[BirthdateMonth];BirthDate[BirthdateYear];language;subid;extrasubid##au;1401;user549@example.com;Emma;Johnson;female;8;2002;de;653156;704485";
+runTest("Test 4 - Random string format", $coreg_url_4);
+
+// Test case 5: JSON format input for convertJsonAPIDataToString
 $json_input_1 = '{
     "country": "au",
     "id_campaign": 1401,
@@ -62,9 +66,9 @@ $json_input_1 = '{
     "subid": 3474234,
     "extrasubid": "__user_id__"
 }';
-runTest("Test 4 - Convert JSON to String (Format 1)", $json_input_1, 'convertJsonAPIDataToString');
+runTest("Test 5 - Convert JSON to String (Format 1)", $json_input_1, 'convertJsonAPIDataToString');
 
-// Test case 5: JSON format input for convertJsonAPIDataToString (no nested 'data' field)
+// Test case 6: JSON format input for convertJsonAPIDataToString (no nested 'data' field)
 $json_input_2 = '{
     "country": "au",
     "id_campaign": 1401,
@@ -78,10 +82,29 @@ $json_input_2 = '{
     "subid": 3474234,
     "extrasubid": "__user_id__"
 }';
-runTest("Test 5 - Convert JSON to String (Format 2)", $json_input_2, 'convertJsonAPIDataToString');
+runTest("Test 6 - Convert JSON to String (Format 2)", $json_input_2, 'convertJsonAPIDataToString');
 
-// Test case 6: Invalid JSON format
+// Test case 7: Invalid JSON format
 $json_input_invalid = '{"country": "au", "id_campaign": 1401,';
-runTest("Test 6 - Invalid JSON Format", $json_input_invalid, 'convertJsonAPIDataToString');
+runTest("Test 7 - Invalid JSON Format", $json_input_invalid, 'convertJsonAPIDataToString');
 
+// Test case 8: Invalid JSON format
+$json_input_invalid_2 = '{
+    "country": "au",
+    "id_campaign": 1401,
+    "data": {
+        "email": "__email__",
+        "firstname": "__firstname__",
+        "surname": "__lastname__",
+        "gender": "__gender__"
+    },
+    "BirthDate": {
+    "BirthdateMonth": "__mob__",
+    "BirthdateYear": "__yob__"
+    },
+    "language": "en",
+    "subid": 3474234,
+    "extrasubid": "__user_id__"
+}';
+runTest("Test 8 -- Invalid JSON Format", $json_input_invalid_2, 'convertJsonAPIDataToString');
 ?>
