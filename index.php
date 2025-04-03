@@ -9,15 +9,7 @@
 	$fields_array = explode(';',$fields_list);
 	$values_array = explode(';',$values_list);
 
-	/**
-	 * Goal: handle different API input format i.e $coreg_url and $coreg_url_format_2
-	 * 1. create function to accept params called convertAPIFormatToJson(apiFormat: String) {}
-	 * 2. create a class with the constructor to handle both of $coreg_url and $coreg_url_format_2
-	 * 3. create input validation, to check if the given input are matches the step 3.
-	 * 4. if not matches, then put into logger, (can write into new file or use console.log)
-	 * 5. the function output is JSON format, means in object
-	 */
-
+	
 	if (count($fields_array)==count($values_array))
 	{
 		$post_fields_array=array_combine($fields_array,$values_array);
