@@ -23,26 +23,33 @@ class APIFormatter {
         list($fields_list, $values_list) = explode('##', $this->coreg_url);
         $fields_array = explode(';', $fields_list);
         $values_array = explode(';', $values_list);
-
+    
         // Validation: Check if field count matches value count
         if (count($fields_array) !== count($values_array)) {
             $this->logError("Mismatch between field count and value count in: " . $this->coreg_url);
             return json_encode(["error" => "Invalid API format. Field count does not match value count."]);
         }
-
+    
         $data = [];
         foreach ($fields_array as $index => $field) {
-            if (strpos($field, 'data[') === 0) {
-                // Extract key inside 'data[]' and store in nested 'data' array
-                $key = str_replace(['data[', ']'], '', $field);
-                $data['data'][$key] = $values_array[$index];
+            // Handle nested arrays, so it will be able to handle more flexible API format.
+            if (preg_match('/([a-zA-Z0-9_]+)\[(.*?)\]/', $field, $matches)) {
+                $parent_key = $matches[1]; // 'data' or 'BirthDate'
+                $child_key = $matches[2];  // 'email' or 'BirthdateMonth'
+    
+                // Create the nested structure
+                if (!isset($data[$parent_key])) {
+                    $data[$parent_key] = [];
+                }
+                $data[$parent_key][$child_key] = $values_array[$index];
             } else {
+                // Non-nested fields
                 $data[$field] = $values_array[$index];
             }
         }
-
+    
         return json_encode($data, JSON_PRETTY_PRINT);
-    }
+    }    
 
     /**
      * Converts a JSON object into a formatted string with field names and values separated by '##',
@@ -65,14 +72,11 @@ class APIFormatter {
         $fields = [];
         $values = [];
 
-        // Iterate through the decoded data and separate fields and values
+        // Iterate through the decoded data and process the fields and values
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                // Handle nested 'data' array
-                foreach ($value as $sub_key => $sub_value) {
-                    $fields[] = "data[$sub_key]";
-                    $values[] = $sub_value;
-                }
+                // Process the nested arrays recursively using the external function
+                $this->processNestedArray($key, $value, $fields, $values);
             } else {
                 $fields[] = $key;
                 $values[] = $value;
@@ -91,11 +95,24 @@ class APIFormatter {
         // Format the output as requested
         $fields_string = implode(';', $fields);
         $values_string = implode(';', $values);
-        $formatted_string = $fields_string . '##' . $values_string;
+        $formatted_string = $fields_string . '##' . $values_string; // to store the string into DB
 
-        // Optionally, you can return the formatted string if needed
-        return $post_fields_array; // or return $formatted_string if you need the string format
+        return $post_fields_array; // Return associative array
     }
+
+    // Recursive method to process nested arrays
+    private function processNestedArray($prefix, $value, &$fields, &$values) {
+        if (is_array($value)) {
+            foreach ($value as $sub_key => $sub_value) {
+                $new_prefix = $prefix . "[" . $sub_key . "]";
+                $this->processNestedArray($new_prefix, $sub_value, $fields, $values); // Recursive call
+            }
+        } else {
+            $fields[] = $prefix; // Add the current key as a field
+            $values[] = $value; // Add the corresponding value
+        }
+    }
+    
 
     /**
      * Logs error messages to a file.
@@ -111,6 +128,5 @@ class APIFormatter {
         // Append the log message to the file
         file_put_contents($log_file, $log_message, FILE_APPEND);
     }
-
 }
 ?>
