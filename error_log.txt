@@ -1,0 +1,1 @@
+2025-04-03 11:28:32 - Mismatch between field count and value count in: country;id_campaign;email;firstname##au;1401;__email__
