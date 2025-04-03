@@ -1,1 +1,3 @@
 2025-04-03 11:28:32 - Mismatch between field count and value count in: country;id_campaign;email;firstname##au;1401;__email__
+2025-04-03 12:09:28 - Mismatch between field count and value count in: country;id_campaign;email;firstname##au;1401;__email__
+2025-04-03 12:09:28 - Invalid JSON input: Syntax error
